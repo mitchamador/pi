@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo apt -y install tightvncserver lxde-core lxde-common gnome-themes-ubuntu gtk2-engines-murrine xfonts-base ttf-ubuntu-font-family lxappearance lxappearance-obconf qt4-qtconfig lxpolkit dbus-x11
+sudo apt -y install tightvncserver xfonts-base lxde-core lxde-common obconf lxterminal gnome-themes-ubuntu gtk2-engines-murrine ttf-ubuntu-font-family lxappearance lxappearance-obconf qt4-qtconfig lxpolkit dbus-x11
 
 vncpasswd
 
