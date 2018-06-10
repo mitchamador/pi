@@ -1,6 +1,6 @@
 #!/bin/bash
 sudo apt update
-sudo apt -y install tightvncserver xfonts-base autocutsel lxde-core lxde-common obconf lxterminal gnome-themes-ubuntu adwaita-icons-theme-full ttf-ubuntu-font-family lxappearance lxappearance-obconf qt4-qtconfig lxpolkit dbus-x11
+sudo apt -y install tightvncserver xfonts-base autocutsel lxde-core lxde-common obconf lxterminal gnome-themes-ubuntu adwaita-icon-theme-full ttf-ubuntu-font-family lxappearance lxappearance-obconf qt4-qtconfig lxpolkit dbus-x11
 
 vncpass=$1
 
