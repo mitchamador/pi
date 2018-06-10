@@ -16,7 +16,7 @@ sudo apt -y install $packages
 
 vncpass=$1
 
-if [ -z $1 ]; then
+if [ "$vncpass" == "" ]; then
   read -p "enter vnc password:" -s vncpass
   echo
 fi
@@ -52,7 +52,7 @@ sudo systemctl start vncserver@0.service
 
 grep "autocutsel -fork" ~/.vnc/xstartup >/dev/null || sed -i '\/etc\/X11\/Xsession/iautocutsel -fork' ~/.vnc/xstartup
 
-wget -q -O - https://github.com/mitchamador/pi/raw/master/segoeui.tar.gz | sudo tar -zxv -C /usr/share/fonts/truetype/
+wget -q -O - https://github.com/mitchamador/pi/raw/master/segoeui.tar.gz | sudo tar -zxv -C /usr/share/fonts/truetype/ >/dev/null
 
 sudo fc-cache -f -v >/dev/null
 
