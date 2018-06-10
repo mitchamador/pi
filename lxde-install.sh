@@ -7,7 +7,7 @@ if [ "$dist" == "ubuntu" ]; then
   packages+=" gnome-themes-ubuntu adwaita-icon-theme-full ttf-ubuntu-font-family"
 elif [ "$dist" == "debian" ]; then
   packages+=" gtk2-engines"
-elif
+else
   echo "no ubuntu, no debian, so exit..."
   exit
 fi
