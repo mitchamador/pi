@@ -1,7 +1,15 @@
 #!/bin/bash
+
 sudo apt -y install tightvncserver xfonts-base autocutsel lxde-core lxde-common obconf lxterminal gnome-themes-ubuntu adwaita-icons-theme-full ttf-ubuntu-font-family lxappearance lxappearance-obconf qt4-qtconfig lxpolkit dbus-x11
 
-vncpasswd
+vncpass=$1
+
+if [ -z $1 ]; then
+  read -p "enter vnc password:" -s vncpass
+  echo
+fi
+
+printf "$vncpass\n$vncpass\n" | vncpasswd -f >.vnc/passwd
 
 cat <<EOF | sudo tee /etc/systemd/system/vncserver@.service >/dev/null
 [Unit]
