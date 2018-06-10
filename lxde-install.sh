@@ -1,6 +1,18 @@
 #!/bin/bash
 sudo apt update
-sudo apt -y install tightvncserver xfonts-base autocutsel lxde-core lxde-common obconf lxterminal gnome-themes-ubuntu adwaita-icon-theme-full ttf-ubuntu-font-family lxappearance lxappearance-obconf qt4-qtconfig lxpolkit dbus-x11
+packages="tightvncserver xfonts-base autocutsel lxde-core lxde-common obconf lxterminal lxappearance lxappearance-obconf qt4-qtconfig lxpolkit dbus-x11"
+
+dist=$(grep ^ID= /etc/*-release | awk -F '=' '{print $2}')
+if [ "$dist" == "ubuntu" ]; then
+  packages+=" gnome-themes-ubuntu adwaita-icon-theme-full ttf-ubuntu-font-family"
+elif [ "$dist" == "debian" ]; then
+  packages+=" gtk2-engines"
+elif
+  echo "no ubuntu, no debian, so exit..."
+  exit
+fi
+
+sudo apt -y install $packages
 
 vncpass=$1
 
@@ -11,6 +23,7 @@ fi
 
 [ -d ~/.vnc ] || mkdir ~/.vnc
 printf "$vncpass\n" | vncpasswd -f >~/.vnc/passwd
+chmod 600 ~/.vnc/passwd
 
 cat <<EOF | sudo tee /etc/systemd/system/vncserver@.service >/dev/null
 [Unit]
