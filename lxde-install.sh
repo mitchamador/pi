@@ -9,6 +9,7 @@ if [ -z $1 ]; then
   echo
 fi
 
+[ -d ~/.vnc ] || mkdir ~/.vnc
 printf "$vncpass\n" | vncpasswd -f >~/.vnc/passwd
 
 cat <<EOF | sudo tee /etc/systemd/system/vncserver@.service >/dev/null
