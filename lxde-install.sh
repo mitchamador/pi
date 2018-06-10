@@ -41,3 +41,5 @@ grep "autocutsel -fork" ~/.vnc/xstartup >/dev/null || sed -i '\/etc\/X11\/Xsessi
 wget -q -O - https://github.com/mitchamador/pi/raw/master/segoeui.tar.gz | sudo tar -zxv -C /usr/share/fonts/truetype/
 
 sudo fc-cache -f -v >/dev/null
+
+echo "reboot needed..."
