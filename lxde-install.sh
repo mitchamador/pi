@@ -9,7 +9,7 @@ if [ -z $1 ]; then
   echo
 fi
 
-printf "$vncpass\n$vncpass\n" | vncpasswd -f >.vnc/passwd
+printf "$vncpass\n$vncpass\n" | vncpasswd -f >~/.vnc/passwd
 
 cat <<EOF | sudo tee /etc/systemd/system/vncserver@.service >/dev/null
 [Unit]
@@ -31,10 +31,15 @@ RestartSec=30
 WantedBy=multi-user.target
 EOF
 
-grep "autocutsel -fork" ~/.vnc/xstartup >/dev/null || sed -i '\/etc\/X11\/Xsession/iautocutsel -fork' ~/.vnc/xstartup
-
 sudo systemctl daemon-reload
 sudo systemctl enable vncserver@0.service
+
+sudo systemctl start vncserver@0.service
+echo "sleeping 10 sec..."
+sleep 10
+sudo systemctl stop vncserver@0.service
+
+grep "autocutsel -fork" ~/.vnc/xstartup >/dev/null || sed -i '\/etc\/X11\/Xsession/iautocutsel -fork' ~/.vnc/xstartup
 
 wget -q -O - https://github.com/mitchamador/pi/raw/master/segoeui.tar.gz | sudo tar -zxv -C /usr/share/fonts/truetype/
 
