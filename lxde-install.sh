@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo apt update
+
 packages="tightvncserver xfonts-base autocutsel lxde-core lxde-common obconf lxterminal lxappearance lxappearance-obconf qt4-qtconfig lxpolkit dbus-x11"
 
 dist=$(grep ^ID= /etc/*-release | awk -F '=' '{print $2}')
