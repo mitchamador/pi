@@ -47,15 +47,30 @@ RestartSec=30
 WantedBy=multi-user.target
 EOF
 
+cat <<EOF >xstartup
+#!/bin/sh
+
+xrdb $HOME/.Xresources
+xsetroot -solid grey
+autocutsel -fork
+#x-terminal-emulator -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
+#x-window-manager &
+# Fix to make GNOME work
+export XKL_XMODMAP_DISABLE=1
+#/etc/X11/Xsession
+/usr/bin/lxsession -s LXDE -e LXDE
+EOF
+
+sudo systemctl stop lightdm
+sudo systemctl disable lightdm
+
 sudo systemctl daemon-reload
 sudo systemctl enable vncserver@0.service
-
 sudo systemctl start vncserver@0.service
 
-grep "autocutsel -fork" ~/.vnc/xstartup >/dev/null || sed -i '\/etc\/X11\/Xsession/iautocutsel -fork' ~/.vnc/xstartup
+#grep "autocutsel -fork" ~/.vnc/xstartup >/dev/null || sed -i '\/etc\/X11\/Xsession/iautocutsel -fork' ~/.vnc/xstartup
 
 wget -q -O - https://github.com/mitchamador/pi/raw/master/segoeui.tar.gz | sudo tar -zxv -C /usr/share/fonts/truetype/ >/dev/null
-
 sudo fc-cache -f -v >/dev/null
 
-echo "reboot needed..."
+echo "done"
