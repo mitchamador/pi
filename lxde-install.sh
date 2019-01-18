@@ -25,6 +25,8 @@ fi
 printf "$vncpass\n" | vncpasswd -f >~/.vnc/passwd
 chmod 600 ~/.vnc/passwd
 
+[ -f ~/.Xresources ] || touch ~/.Xresources
+
 cat <<EOF | sudo tee /etc/systemd/system/vncserver@.service >/dev/null
 [Unit]
 Description=Start TightVNC server at startup
