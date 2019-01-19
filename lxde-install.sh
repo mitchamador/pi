@@ -40,8 +40,8 @@ PIDFile=/home/${USER}/.vnc/%H:%i.pid
 ExecStartPre=-/usr/bin/tightvncserver -kill :%i > /dev/null 2>&1
 ExecStart=/usr/bin/tightvncserver :%i -desktop X -auth /home/${USER}/.Xauthority -geometry 1366x768 -depth 16 -rfbwait 120000 -rfbauth /home/${USER}/.vnc/passwd -fp /usr/share/fonts/X11/misc/,/usr/share/fonts/X11/Type1/,/usr/share/fonts/X11/75dpi/,/usr/share/fonts/X11/100dpi/ -co /etc/X11/rgb -dpi 100
 ExecStop=/usr/bin/tightvncserver -kill :%i
-Restart=on-failure
-RestartSec=30
+#Restart=on-failure
+#RestartSec=30
 
 [Install]
 WantedBy=multi-user.target
