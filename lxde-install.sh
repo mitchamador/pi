@@ -1,6 +1,6 @@
 #!/bin/bash
 
-packages="tightvncserver xfonts-base autocutsel lxde-core lxde-common obconf lxterminal lxappearance lxappearance-obconf qt4-qtconfig lxpolkit dbus-x11"
+packages="tightvncserver xfonts-base autocutsel lxde qt4-qtconfig dbus-x11 policykit-1 lxpolkit lxsession-logout lxtask"
 
 dist=$(grep ^ID= /etc/*-release | awk -F '=' '{print $2}')
 if [ "$dist" == "ubuntu" ]; then
@@ -12,20 +12,39 @@ else
   exit
 fi
 
-sudo apt -y install $packages
+sudo apt -y --no-install-recommends install $packages
+
+wget -q -O - https://github.com/mitchamador/pi/raw/master/segoeui.tar.gz | sudo tar -zxv -C /usr/share/fonts/truetype/ >/dev/null
+sudo fc-cache -f -v >/dev/null
 
 vncpass=$1
 
-if [ "$vncpass" == "" ]; then
-  read -p "enter vnc password:" -s vncpass
-  echo
+if [ ! -e ~/.vnc/passwd ]; then
+  if [ "$vncpass" == "" ]; then
+    read -p "enter vnc password:" -s vncpass
+    echo
+  fi
+
+  [ -d ~/.vnc ] || mkdir ~/.vnc
+  printf "$vncpass\n" | vncpasswd -f >~/.vnc/passwd
+  chmod 600 ~/.vnc/passwd
 fi
 
-[ -d ~/.vnc ] || mkdir ~/.vnc
-printf "$vncpass\n" | vncpasswd -f >~/.vnc/passwd
-chmod 600 ~/.vnc/passwd
+[ -e ~/.Xresources ] || touch ~/.Xresources
+[ -e ~/.Xauthority ] || touch ~/.Xauthority
 
-[ -f ~/.Xresources ] || touch ~/.Xresources
+if [ ! -e ~/.vnc/xstartup ]; then
+   /usr/bin/tightvncserver :0 -desktop X -geometry 1366x768 -depth 16 -dpi 96
+   sleep 5
+   /usr/bin/tightvncserver -kill :0
+fi
+
+grep "autocutsel -fork" ~/.vnc/xstartup >/dev/null || sed -i '\/etc\/X11\/Xsession/iautocutsel -fork' ~/.vnc/xstartup
+
+sed -i -e 's/^sNet\/ThemeName.*/sNet\/ThemeName=Clearlooks/g' -e 's/^sNet\/IconThemeName.*/sNet\/IconThemeName=nuoveXT2/g' -e 's/^sGtk\/FontName.*/sGtk\/FontName=Segoe UI 8/g' -e 's/^sGtk\/CursorThemeName.*/sGtk\/CursorThemeName=Adwaita/g' ~/.config/lxsession/LXDE/desktop.conf
+
+sed -i -e 's/<weight>.*<\/weight>/<weight>normal<\/weight>/g' -e 's/<weight\/>/<weight>normal<\/weight>/g' -e 's/<size>.*<\/size>/<size>8<\/size>/g' -e 's/<name>sans<\/name>/<name>Segoe UI<\/name>/gI' -e 's/<name>onyx<\/name>/<name>Bear2<\/name>/gI' ~/.config/openbox/lxde-rc.xml
+
 
 cat <<EOF | sudo tee /etc/systemd/system/vncserver@.service >/dev/null
 [Unit]
@@ -38,7 +57,7 @@ User=${USER}
 PAMName=login
 PIDFile=/home/${USER}/.vnc/%H:%i.pid
 ExecStartPre=-/usr/bin/tightvncserver -kill :%i > /dev/null 2>&1
-ExecStart=/usr/bin/tightvncserver :%i -desktop X -auth /home/${USER}/.Xauthority -geometry 1366x768 -depth 16 -rfbwait 120000 -rfbauth /home/${USER}/.vnc/passwd -fp /usr/share/fonts/X11/misc/,/usr/share/fonts/X11/Type1/,/usr/share/fonts/X11/75dpi/,/usr/share/fonts/X11/100dpi/ -co /etc/X11/rgb -dpi 100
+ExecStart=/usr/bin/tightvncserver :%i -desktop X -geometry 1366x768 -depth 16 -dpi 96
 ExecStop=/usr/bin/tightvncserver -kill :%i
 #Restart=on-failure
 #RestartSec=30
@@ -47,30 +66,8 @@ ExecStop=/usr/bin/tightvncserver -kill :%i
 WantedBy=multi-user.target
 EOF
 
-cat <<EOF >xstartup
-#!/bin/sh
-
-xrdb $HOME/.Xresources
-xsetroot -solid grey
-autocutsel -fork
-#x-terminal-emulator -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
-#x-window-manager &
-# Fix to make GNOME work
-export XKL_XMODMAP_DISABLE=1
-#/etc/X11/Xsession
-/usr/bin/lxsession -s LXDE -e LXDE
-EOF
-
-sudo systemctl stop lightdm
-sudo systemctl disable lightdm
-
 sudo systemctl daemon-reload
 sudo systemctl enable vncserver@0.service
 sudo systemctl start vncserver@0.service
-
-#grep "autocutsel -fork" ~/.vnc/xstartup >/dev/null || sed -i '\/etc\/X11\/Xsession/iautocutsel -fork' ~/.vnc/xstartup
-
-wget -q -O - https://github.com/mitchamador/pi/raw/master/segoeui.tar.gz | sudo tar -zxv -C /usr/share/fonts/truetype/ >/dev/null
-sudo fc-cache -f -v >/dev/null
 
 echo "done"
