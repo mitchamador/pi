@@ -1,3 +1,2 @@
 #install vnc
- 
-bash <(wget -qO- https://github.com/mitchamador/pi/raw/master/lxde-install.sh)
+wget -q https://github.com/mitchamador/pi/raw/master/lxde-install.sh -O - | bash -s -- password
