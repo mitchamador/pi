@@ -74,7 +74,6 @@ WantedBy=multi-user.target
 EOF
 
 if [ "$dist" == "ubuntu" -a "$release" == "18.04" ]; then
-  sudo sed -i 's/^PIDFile/#PIDFile/g' /etc/systemd/system/vncserver@.service
   sudo systemctl disable lightdm.service
 fi
 
