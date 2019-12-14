@@ -18,7 +18,7 @@ else
 fi
 
 sudo apt update
-sudo apt upgrade
+sudo apt -y upgrade
 sudo apt -y --no-install-recommends install $packages
 
 wget -q -O - https://github.com/mitchamador/pi/raw/master/segoeui.tar.gz | sudo tar -zxv -C /usr/share/fonts/truetype/ >/dev/null
