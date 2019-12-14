@@ -3,8 +3,13 @@
 packages="tightvncserver xfonts-base autocutsel lxde qt4-qtconfig dbus-x11 policykit-1 lxpolkit lxsession-logout lxtask"
 
 dist=$(grep ^ID= /etc/*-release | awk -F '=' '{print $2}')
+release=$(grep ^DISTRIB_RELEASE= /etc/*-release | awk -F '=' '{print $2}')
 if [ "$dist" == "ubuntu" ]; then
-  packages+=" gnome-themes-ubuntu adwaita-icon-theme-full ttf-ubuntu-font-family"
+  if [ "$release" == "16.04" -o "$release" == "18.04" ]; then
+    packages+=" gnome-themes-ubuntu adwaita-icon-theme-full ttf-ubuntu-font-family"
+  else
+    echo "only 16.04 and 18.04 ubuntu is supported"
+  fi
 elif [ "$dist" == "debian" ]; then
   packages+=" gtk2-engines"
 else
@@ -65,6 +70,11 @@ ExecStop=/usr/bin/tightvncserver -kill :%i
 [Install]
 WantedBy=multi-user.target
 EOF
+
+if [ "$dist" == "ubuntu" -a "$release" == "18.04" ]; then
+  sudo sed -i 's/^PIDFile/#PIDFile/g' /etc/systemd/system/vncserver@.service
+  sudo systemctl disable lightdm.service
+fi
 
 sudo systemctl daemon-reload
 sudo systemctl enable vncserver@0.service
