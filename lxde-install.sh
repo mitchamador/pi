@@ -1,17 +1,20 @@
 #!/bin/bash
 
-packages="tightvncserver xfonts-base autocutsel lxde qt4-qtconfig dbus-x11 policykit-1 lxpolkit lxsession-logout lxtask"
+packages="tightvncserver xfonts-base autocutsel lxde dbus-x11 policykit-1 lxpolkit lxsession-logout lxtask"
 
 dist=$(grep ^ID= /etc/*-release | awk -F '=' '{print $2}')
 release=$(grep ^DISTRIB_RELEASE= /etc/*-release | awk -F '=' '{print $2}')
 if [ "$dist" == "ubuntu" ]; then
-  if [ "$release" == "16.04" -o "$release" == "18.04" ]; then
+  if [ "$release" == "16.04" -o "$release" == "18.04" -o "$release" == "20.04" ]; then
     packages+=" gnome-themes-ubuntu adwaita-icon-theme-full ttf-ubuntu-font-family"
+    if [ "$release" == "16.04" -o "$release" == "18.04" ]; then
+      packages+=" qt4-qtconfig"
+    fi
   else
-    echo "only 16.04 and 18.04 ubuntu is supported"
+    echo "16.04, 18.04 and 20.04 ubuntu is supported"
   fi
 elif [ "$dist" == "debian" ]; then
-  packages+=" gtk2-engines"
+  packages+=" gtk2-engines qt4-qtconfig"
 else
   echo "no ubuntu, no debian, so exit..."
   exit
@@ -81,4 +84,4 @@ sudo systemctl daemon-reload
 sudo systemctl enable vncserver@0.service
 sudo systemctl start vncserver@0.service
 
-echo "done"
+echo "done" 
