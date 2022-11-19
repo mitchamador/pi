@@ -3,18 +3,25 @@
 packages="tightvncserver xfonts-base autocutsel lxde dbus-x11 policykit-1 lxpolkit lxsession-logout lxtask"
 
 dist=$(grep ^ID= /etc/*-release | awk -F '=' '{print $2}')
-release=$(grep ^DISTRIB_RELEASE= /etc/*-release | awk -F '=' '{print $2}')
+version=$(grep ^VERSION_ID= /etc/*-release | awk -F '=' '{print $2}' | tr -d '"')
 if [ "$dist" == "ubuntu" ]; then
-  if [ "$release" == "16.04" -o "$release" == "18.04" -o "$release" == "20.04" ]; then
+  if [ "$version" == "16.04" -o "$version" == "18.04" -o "$version" == "20.04" ]; then
     packages+=" gnome-themes-ubuntu adwaita-icon-theme-full ttf-ubuntu-font-family"
-    if [ "$release" == "16.04" -o "$release" == "18.04" ]; then
+    if [ "$version" == "16.04" -o "$version" == "18.04" ]; then
       packages+=" qt4-qtconfig"
     fi
   else
-    echo "16.04, 18.04 and 20.04 ubuntu is supported"
+    echo "ubuntu 16.04, 18.04 and 20.04 is supported"
   fi
 elif [ "$dist" == "debian" ]; then
-  packages+=" gtk2-engines qt4-qtconfig"
+  if [ "$version" == "9" -o "$version" == "10" -o "$version" == "11" ]; then
+    packages+=" gtk2-engines"
+    if [ "$version" == "9" -o "$version" == "10" ]; then
+      packages+=" qt4-qtconfig"
+	fi
+  else
+    echo "debian 9, 10 and 11 is supported"
+  fi
 else
   echo "no ubuntu, no debian, so exit..."
   exit
@@ -64,7 +71,9 @@ After=syslog.target network.target
 [Service]
 Type=forking
 User=${USER}
-PAMName=login
+Group=${USER}
+WorkingDirectory=/home/${USER}
+#PAMName=login
 PIDFile=/home/${USER}/.vnc/%H:%i.pid
 ExecStartPre=-/usr/bin/tightvncserver -kill :%i > /dev/null 2>&1
 ExecStart=/usr/bin/tightvncserver :%i -desktop X -geometry 1366x768 -depth 16 -dpi 96
@@ -76,8 +85,18 @@ ExecStop=/usr/bin/tightvncserver -kill :%i
 WantedBy=multi-user.target
 EOF
 
-if [ "$dist" == "ubuntu" -a "$release" == "18.04" ]; then
-  sudo systemctl disable lightdm.service
+sudo systemctl disable lightdm.service
+
+if [ "$dist" == "ubuntu" -a "$version" == "16.04" ]; then
+  enable_pamname=yes
+elif [ "$dist" == "debian" -a "$version" == "9" ]; then
+  enable_pamname=yes
+fi
+
+if [ "$enable_pamname" == "yes" ]; then
+  sudo sed -i 's/#PAMName=login/PAMName=login/g' /etc/systemd/system/vncserver@.service
+else
+  sed -i 's/^polkit.*/polkit\/command=/g' ~/.config/lxsession/LXDE/desktop.conf
 fi
 
 sudo systemctl daemon-reload
