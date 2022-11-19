@@ -10,8 +10,10 @@ if [ "$dist" == "ubuntu" ]; then
     if [ "$version" == "16.04" -o "$version" == "18.04" ]; then
       packages+=" qt4-qtconfig"
     fi
+  elif [ "$version" == "22.04" ]; then
+    packages+=" gnome-themes-ubuntu adwaita-icon-theme-full"
   else
-    echo "ubuntu 16.04, 18.04 and 20.04 is supported"
+    echo "ubuntu 16.04, 18.04, 20.04 and 22.04 is supported"
   fi
 elif [ "$dist" == "debian" ]; then
   if [ "$version" == "9" -o "$version" == "10" -o "$version" == "11" ]; then
