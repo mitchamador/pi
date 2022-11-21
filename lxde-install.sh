@@ -20,7 +20,7 @@ elif [ "$dist" == "debian" ]; then
     packages+=" gtk2-engines"
     if [ "$version" == "9" -o "$version" == "10" ]; then
       packages+=" qt4-qtconfig"
-	fi
+  fi
   else
     echo "debian 9, 10 and 11 is supported"
   fi
@@ -64,6 +64,38 @@ sed -i -e 's/^sNet\/ThemeName.*/sNet\/ThemeName=Clearlooks/g' -e 's/^sNet\/IconT
 
 sed -i -e 's/<weight>.*<\/weight>/<weight>normal<\/weight>/g' -e 's/<weight\/>/<weight>normal<\/weight>/g' -e 's/<size>.*<\/size>/<size>8<\/size>/g' -e 's/<name>sans<\/name>/<name>Segoe UI<\/name>/gI' -e 's/<name>onyx<\/name>/<name>Bear2<\/name>/gI' ~/.config/openbox/lxde-rc.xml
 
+sudo systemctl disable lightdm.service
+
+if [ "$dist" == "ubuntu" -a "$version" == "16.04" ]; then
+  systemd_user=no
+elif [ "$dist" == "debian" -a "$version" == "9" ]; then
+  systemd_user=no
+fi
+
+if [ "$systemd_user" != "no" ]; then
+
+mkdir -p ~/.local/share/systemd/user
+
+cat <<EOF | tee ~/.local/share/systemd/user/vncserver@.service >/dev/null
+[Unit]
+Description=Start TightVNC server at startup
+After=syslog.target network.target
+
+[Service]
+Type=forking
+ExecStartPre=-/usr/bin/tightvncserver -kill :%i > /dev/null 2>&1
+ExecStart=/usr/bin/tightvncserver :%i -desktop X -geometry 1366x768 -depth 16 -dpi 96
+ExecStop=/usr/bin/tightvncserver -kill :%i
+
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl daemon-reload --user
+systemctl enable vncserver@0.service --user
+systemctl start vncserver@0.service --user
+
+else
 
 cat <<EOF | sudo tee /etc/systemd/system/vncserver@.service >/dev/null
 [Unit]
@@ -75,7 +107,7 @@ Type=forking
 User=${USER}
 Group=${USER}
 WorkingDirectory=/home/${USER}
-#PAMName=login
+PAMName=login
 PIDFile=/home/${USER}/.vnc/%H:%i.pid
 ExecStartPre=-/usr/bin/tightvncserver -kill :%i > /dev/null 2>&1
 ExecStart=/usr/bin/tightvncserver :%i -desktop X -geometry 1366x768 -depth 16 -dpi 96
@@ -87,22 +119,10 @@ ExecStop=/usr/bin/tightvncserver -kill :%i
 WantedBy=multi-user.target
 EOF
 
-sudo systemctl disable lightdm.service
-
-if [ "$dist" == "ubuntu" -a "$version" == "16.04" ]; then
-  enable_pamname=yes
-elif [ "$dist" == "debian" -a "$version" == "9" ]; then
-  enable_pamname=yes
-fi
-
-if [ "$enable_pamname" == "yes" ]; then
-  sudo sed -i 's/#PAMName=login/PAMName=login/g' /etc/systemd/system/vncserver@.service
-else
-  sed -i 's/^polkit.*/polkit\/command=/g' ~/.config/lxsession/LXDE/desktop.conf
-fi
-
 sudo systemctl daemon-reload
 sudo systemctl enable vncserver@0.service
 sudo systemctl start vncserver@0.service
+
+fi
 
 echo "done" 
