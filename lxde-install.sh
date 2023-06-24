@@ -16,13 +16,13 @@ if [ "$dist" == "ubuntu" ]; then
     echo "ubuntu 16.04, 18.04, 20.04 and 22.04 is supported"
   fi
 elif [ "$dist" == "debian" ]; then
-  if [ "$version" == "9" -o "$version" == "10" -o "$version" == "11" ]; then
+  if [ "$version" == "9" -o "$version" == "10" -o "$version" == "11" -o "$version" == "12" ]; then
     packages+=" gtk2-engines"
     if [ "$version" == "9" -o "$version" == "10" ]; then
       packages+=" qt4-qtconfig"
   fi
   else
-    echo "debian 9, 10 and 11 is supported"
+    echo "debian 9, 10, 11 and 12 is supported"
   fi
 else
   echo "no ubuntu, no debian, so exit..."

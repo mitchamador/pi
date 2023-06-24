@@ -2,7 +2,7 @@
 
 scripts for install vnc and docker.
 
-install vnc
+install lxde with tightvncserver
 ```
 wget -q https://github.com/mitchamador/pi/raw/master/lxde-install.sh -O - | bash -s -- <your password>
 ```
