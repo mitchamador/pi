@@ -29,6 +29,9 @@ else
   exit
 fi
 
+echo $packages | grep qt4-qtconfig >/dev/null || packages+=" qt5ct"
+echo $packages | grep qt5ct >/dev/null && echo "QT_QPA_PLATFORMTHEME=qt5ct" | sudo tee -a /etc/environment
+ 
 sudo apt update
 sudo apt -y upgrade
 sudo apt -y --no-install-recommends install $packages
@@ -53,7 +56,7 @@ fi
 [ -e ~/.Xauthority ] || touch ~/.Xauthority
 
 if [ ! -e ~/.vnc/xstartup ]; then
-   /usr/bin/tightvncserver :0 -desktop X -geometry 1366x768 -depth 16 -dpi 96
+   /usr/bin/tightvncserver :0 -desktop X -geometry 1600x900 -depth 16 -dpi 120
    sleep 5
    /usr/bin/tightvncserver -kill :0
 fi
