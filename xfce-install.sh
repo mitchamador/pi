@@ -4,7 +4,7 @@
 [ -z $VNC_DEPTH ] && VNC_DEPTH="16"
 [ -z $VNC_DPI ] && VNC_DPI="120"
 
-packages="tightvncserver xfonts-base autocutsel lxde dbus-x11 policykit-1 lxpolkit lxsession-logout lxtask"
+packages="tightvncserver xfonts-base autocutsel dbus-x11 policykit-1 gtk2-engines libxfce4ui-utils thunar xfce4-appfinder xfce4-panel xfce4-pulseaudio-plugin xfce4-whiskermenu-plugin xfce4-session xfce4-settings xfce4-terminal xfconf xfdesktop4 xfwm4"
 
 dist=$(grep ^ID= /etc/*-release | awk -F '=' '{print $2}')
 version=$(grep ^VERSION_ID= /etc/*-release | awk -F '=' '{print $2}' | tr -d '"')
@@ -13,8 +13,8 @@ packages_ubuntu_1604="gnome-themes-ubuntu adwaita-icon-theme-full ttf-ubuntu-fon
 packages_ubuntu_1804="gnome-themes-ubuntu adwaita-icon-theme-full ttf-ubuntu-font-family qt4-qtconfig"
 packages_ubuntu_2004="gnome-themes-ubuntu adwaita-icon-theme-full ttf-ubuntu-font-family adwaita-qt qt5ct"
 packages_ubuntu_2204="gnome-themes-ubuntu adwaita-icon-theme-full adwaita-qt qt5ct"
-packages_debian_9="gtk2-engines qt4-qtconfig"
-packages_debian_10="gtk2-engines qt4-qtconfig"
+packages_debian_9="x11-xserver-utils gtk2-engines qt4-qtconfig"
+packages_debian_10="x11-xserver-utils gtk2-engines qt4-qtconfig"
 packages_debian_11="gtk2-engines adwaita-qt qt5ct"
 packages_debian_12="gtk2-engines adwaita-qt qt5ct"
 
@@ -28,7 +28,7 @@ else
 fi
 
 echo $packages | grep qt5ct >/dev/null && echo "QT_QPA_PLATFORMTHEME=qt5ct" | sudo tee -a /etc/environment >/dev/null
- 
+
 sudo apt update
 sudo apt -y upgrade
 sudo apt -y --no-install-recommends install $packages
@@ -55,17 +55,22 @@ fi
 if [ ! -e ~/.vnc/xstartup ]; then
    /usr/bin/tightvncserver :0 -desktop X -geometry $VNC_RESOLUTION -depth $VNC_DEPTH -dpi $VNC_DPI
    sleep 5
+   DISPLAY=:0 xfconf-query -c xfwm4 -np /general/title_font -t "string" -s "Segoe UI Bold 10"
+   DISPLAY=:0 xfconf-query -c xfwm4 -np /general/workspace_count -t "int" -s "2"
+   DISPLAY=:0 xfconf-query -c xsettings -np /Gtk/FontName -t "string" -s "Segoe UI 10"
+   DISPLAY=:0 xfconf-query -c xsettings -np /Gtk/MonospaceFontName -t "string" -s "Monospace 10"
+   DISPLAY=:0 xfconf-query -c xsettings -np /Xft/DPI -t "int" -s "$VNC_DPI"
+   DISPLAY=:0 xfconf-query -c xfce4-panel -np /panels/panel-1/size -t "int" -s "33"
    /usr/bin/tightvncserver -kill :0
 fi
 
 grep "autocutsel -fork" ~/.vnc/xstartup >/dev/null || sed -i '\/etc\/X11\/Xsession/iautocutsel -fork' ~/.vnc/xstartup
 
-sed -i -e 's/^sNet\/ThemeName.*/sNet\/ThemeName=Clearlooks/g' -e 's/^sNet\/IconThemeName.*/sNet\/IconThemeName=nuoveXT2/g' -e 's/^sGtk\/FontName.*/sGtk\/FontName=Segoe UI 10/g' -e 's/^sGtk\/CursorThemeName.*/sGtk\/CursorThemeName=Adwaita/g' ~/.config/lxsession/LXDE/desktop.conf
-
-sed -i -e 's/<weight>.*<\/weight>/<weight>normal<\/weight>/g' -e 's/<weight\/>/<weight>normal<\/weight>/g' -e 's/<size>.*<\/size>/<size>10<\/size>/g' -e 's/<name>sans<\/name>/<name>Segoe UI<\/name>/gI' -e 's/<name>onyx<\/name>/<name>Bear2<\/name>/gI' ~/.config/openbox/lxde-rc.xml
-
-sudo wget -q -O /usr/share/lxpanel/images/black-33.png https://github.com/mitchamador/pi/raw/master/lxpanel/black-33.png
-sed 's:height=.*:height=33:g;s:backgroundfile=.*:backgroundfile=/usr/share/lxpanel/images/black-33.png:g' /etc/xdg/lxpanel/default/panels/panel >~/.config/lxpanel/LXDE/panels/panel
+mkdir -p ~/.config/xfce4/terminal
+cat <<EOF >~/.config/xfce4/terminal/terminalrc
+[Configuration]
+FontName=Monospace 10
+EOF
 
 echo $packages | grep qt5ct >/dev/null && (
   mkdir -p ~/.config/qt5ct
@@ -80,8 +85,6 @@ EOF
 font="Segoe UI,10,-1,5,50,0,0,0,0,0"
 EOF
 )
-
-sudo systemctl disable lightdm.service
 
 systemd_system_ubuntu_1604="yes"
 systemd_system_debian_9="yes"
