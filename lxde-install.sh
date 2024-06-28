@@ -41,12 +41,15 @@ sudo fc-cache -f -v >/dev/null
 
 if [ "$1" == "" ]; then
   INSECURE_COMMENT=""
+  INSECURE_COMMENT_TIGERVNC=""
   touch ~/.vnc/passwd
-  echo $packages | grep tightvncserver >/dev/null && INSECURE_COMMENT_TIGERVNC="#"
 else
   INSECURE_COMMENT="#"
+  INSECURE_COMMENT_TIGERVNC="#"
   printf "$1\n" | vncpasswd -f >~/.vnc/passwd
 fi
+
+echo $packages | grep tightvncserver >/dev/null && INSECURE_COMMENT_TIGERVNC="#"
 
 printf "${INSECURE_COMMENT}\$authType = \"\";\n" >~/.vnc/tightvncserver.conf
 printf "${INSECURE_COMMENT}\$SecurityTypes = \"None,TLSNone\";\n" >~/.vnc/tigervnc.conf
